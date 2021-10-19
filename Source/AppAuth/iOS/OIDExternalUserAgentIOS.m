@@ -87,8 +87,8 @@ NS_ASSUME_NONNULL_BEGIN
   BOOL openedUserAgent = NO;
   NSURL *requestURL = [request externalUserAgentRequestURL];
 
-  // iOS 12 and later, use ASWebAuthenticationSession
-  if (@available(iOS 12.0, *)) {
+  // iOS 13 and later, use ASWebAuthenticationSession with ephemeral web session
+  if (@available(iOS 13.0, *)) {
     // ASWebAuthenticationSession doesn't work with guided access (rdar://40809553)
     if (!UIAccessibilityIsGuidedAccessEnabled()) {
       __weak OIDExternalUserAgentIOS *weakSelf = self;
@@ -123,37 +123,7 @@ NS_ASSUME_NONNULL_BEGIN
       openedUserAgent = [authenticationVC start];
     }
   }
-  // iOS 11, use SFAuthenticationSession
-  if (@available(iOS 11.0, *)) {
-    // SFAuthenticationSession doesn't work with guided access (rdar://40809553)
-    if (!openedUserAgent && !UIAccessibilityIsGuidedAccessEnabled()) {
-      __weak OIDExternalUserAgentIOS *weakSelf = self;
-      NSString *redirectScheme = request.redirectScheme;
-      SFAuthenticationSession *authenticationVC =
-          [[SFAuthenticationSession alloc] initWithURL:requestURL
-                                     callbackURLScheme:redirectScheme
-                                     completionHandler:^(NSURL * _Nullable callbackURL,
-                                                         NSError * _Nullable error) {
-        __strong OIDExternalUserAgentIOS *strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
-        strongSelf->_authenticationVC = nil;
-        if (callbackURL) {
-          [strongSelf->_session resumeExternalUserAgentFlowWithURL:callbackURL];
-        } else {
-          NSError *safariError =
-              [OIDErrorUtilities errorWithCode:OIDErrorCodeUserCanceledAuthorizationFlow
-                               underlyingError:error
-                                   description:@"User cancelled."];
-          [strongSelf->_session failExternalUserAgentFlowWithError:safariError];
-        }
-      }];
-      _authenticationVC = authenticationVC;
-      openedUserAgent = [authenticationVC start];
-    }
-  }
-  // iOS 9 and 10, use SFSafariViewController
+  // iOS 9+, use SFSafariViewController
   if (@available(iOS 9.0, *)) {
     if (!openedUserAgent && _presentingViewController) {
       SFSafariViewController *safariVC =
