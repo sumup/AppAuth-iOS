@@ -125,19 +125,18 @@ NS_ASSUME_NONNULL_BEGIN
       authenticationVC.prefersEphemeralWebBrowserSession = YES;
 
       if (@available(iOS 13.4, *)) {
-        BOOL canStart = [authenticationVC canStart];
-        if (canStart) {
+        if ([authenticationVC canStart]) {
           openedUserAgent = [authenticationVC start];
         }
       } else {
         // `canStart` is only available in iOS 13.4
         // we need to work around the fallback logic to not trigger the result block twice
         openedUserAgent = [authenticationVC start];
-        didFinishSetup = YES;
       }
 
       if (openedUserAgent) {
         _webAuthenticationVC = authenticationVC;
+        didFinishSetup = YES;
       }
     }
   }
