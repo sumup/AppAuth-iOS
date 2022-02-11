@@ -93,11 +93,18 @@ NS_ASSUME_NONNULL_BEGIN
     if (!UIAccessibilityIsGuidedAccessEnabled()) {
       __weak OIDExternalUserAgentIOS *weakSelf = self;
       NSString *redirectScheme = request.redirectScheme;
+
+      BOOL didFinishSetup = NO;
+
       ASWebAuthenticationSession *authenticationVC =
           [[ASWebAuthenticationSession alloc] initWithURL:requestURL
                                         callbackURLScheme:redirectScheme
                                         completionHandler:^(NSURL * _Nullable callbackURL,
                                                             NSError * _Nullable error) {
+        if (!@available(iOS 13.4, *) && !didFinishSetup) {
+          return;
+        }
+
         __strong OIDExternalUserAgentIOS *strongSelf = weakSelf;
         if (!strongSelf) {
             return;
@@ -117,8 +124,21 @@ NS_ASSUME_NONNULL_BEGIN
       authenticationVC.presentationContextProvider = self;
       authenticationVC.prefersEphemeralWebBrowserSession = YES;
 
-      _webAuthenticationVC = authenticationVC;
-      openedUserAgent = [authenticationVC start];
+      if (@available(iOS 13.4, *)) {
+        BOOL canStart = [authenticationVC canStart];
+        if (canStart) {
+          openedUserAgent = [authenticationVC start];
+        }
+      } else {
+        // `canStart` is only available in iOS 13.4
+        // we need to work around the fallback logic to not trigger the result block twice
+        openedUserAgent = [authenticationVC start];
+        didFinishSetup = YES;
+      }
+
+      if (openedUserAgent) {
+        _webAuthenticationVC = authenticationVC;
+      }
     }
   }
   // iOS 9+, use SFSafariViewController
