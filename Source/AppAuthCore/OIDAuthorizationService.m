@@ -313,10 +313,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 static OIDIDTokenValidator *_idTokenValidator;
 
++ (void)initialize {
+  [super initialize];
+
+  _idTokenValidator = [OIDIDTokenValidator new];
+}
+
 + (nullable OIDIDTokenValidator *)idTokenValidator {
-  if (!_idTokenValidator) {
-    _idTokenValidator = [OIDIDTokenValidator new];
-  }
   return _idTokenValidator;
 }
 
