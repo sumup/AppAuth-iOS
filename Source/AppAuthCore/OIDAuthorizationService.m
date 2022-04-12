@@ -313,14 +313,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 static OIDIDTokenValidator *_idTokenValidator;
 
-+ (OIDIDTokenValidator *)idTokenValidator {
++ (nullable OIDIDTokenValidator *)idTokenValidator {
   if (!_idTokenValidator) {
     _idTokenValidator = [OIDIDTokenValidator new];
   }
   return _idTokenValidator;
 }
 
-+ (void)setIdTokenValidator:(OIDIDTokenValidator *)idTokenValidator {
++ (void)setIdTokenValidator:(nullable OIDIDTokenValidator *)idTokenValidator {
   _idTokenValidator = idTokenValidator;
 }
 
@@ -545,10 +545,9 @@ static OIDIDTokenValidator *_idTokenValidator;
     }
 
     // If an ID Token is included in the response, validates the ID Token.
-    if (tokenResponse.idToken) {
-      OIDIDTokenValidator *idTokenValidator = self.idTokenValidator;
-      NSError *idTokenValidationError = [idTokenValidator validateIDTokenFromTokenResponse:tokenResponse
-                                                                     authorizationResponse:authorizationResponse];
+    if (tokenResponse.idToken && self.idTokenValidator) {
+      NSError *idTokenValidationError = [self.idTokenValidator validateIDTokenFromTokenResponse:tokenResponse
+                                                                          authorizationResponse:authorizationResponse];
       if (idTokenValidationError) {
         dispatch_async(dispatch_get_main_queue(), ^{
           callback(nil, idTokenValidationError);

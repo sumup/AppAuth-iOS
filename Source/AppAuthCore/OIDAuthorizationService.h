@@ -93,7 +93,7 @@ typedef void (^OIDRegistrationCompletion)(OIDRegistrationResponse *_Nullable reg
 
 /*! @brief The ID Token's validator instance used in the `performTokenRequest` methods. If the property is not set, the default validator will be used.
  */
-@property(nonatomic, class) OIDIDTokenValidator *idTokenValidator;
+@property(nonatomic, class, nullable) OIDIDTokenValidator *idTokenValidator;
 
 /*! @internal
     @brief Unavailable. This class should not be initialized.
