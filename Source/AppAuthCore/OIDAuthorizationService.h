@@ -91,7 +91,9 @@ typedef void (^OIDRegistrationCompletion)(OIDRegistrationResponse *_Nullable reg
  */
 @property(nonatomic, readonly) OIDServiceConfiguration *configuration;
 
-/*! @brief The ID Token's validator instance used in the `performTokenRequest` methods. If the property is not set, the default validator will be used.
+/*! @brief The ID Token's validator instance used in the `performTokenRequest` methods.
+    @remarks Upon initialization the default validator (`[OIDIDTokenValidator new]`) is used.
+        When an empty validator is set, the ID Token validation will be skipped.
  */
 @property(nonatomic, class, nullable) OIDIDTokenValidator *idTokenValidator;
 
