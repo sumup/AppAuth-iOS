@@ -1,0 +1,44 @@
+name: Bump version
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        type: choice
+        description: 'Specify the type of version bump to be performed. (major.minor.patch)'
+        required: true
+        default: 'patch'
+        options:
+          - major
+          - minor
+          - patch
+  pull_request:
+    paths:
+      - '.github/workflows/bump_version.yml'
+      - 'submodules/ios-tooling'
+
+jobs:
+  bump_version:
+    name: Bump version
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ secrets.GH_ACTIONS_PAT }}
+          submodules: recursive
+
+      - name: Bump ${{ github.event.inputs.bump_type }} version
+        uses: ./submodules/ios-tooling/gh-actions/bump-version
+        with:
+          bump-type: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.bump_type || 'minor' }}
+          github-token: ${{ secrets.GH_ACTIONS_PAT }}
+          skip-registry: false
+          # Perform a dry-run whenever we are not in workflow_dispatch
+          dry-run: ${{ github.event_name != 'workflow_dispatch' }}

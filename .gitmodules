@@ -1,0 +1,3 @@
+[submodule "submodules/ios-tooling"]
+	path = submodules/ios-tooling
+	url = git@github.com:sumup/ios-tooling.git
